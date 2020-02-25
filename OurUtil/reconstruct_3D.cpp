@@ -63,7 +63,7 @@ PointCloud<PointXYZRGB>::Ptr construct_point_cloud(const Mat& rgb, const Mat& de
     test_img_size(depth);
 	// 相机坐标系下的点云
 	PointCloud<PointXYZRGB>::Ptr cloud(new PointCloud<PointXYZRGB>);
-	float right_col, right_row;
+	float right_col, right_row; //
 	for (int row = 0; row < depth.rows; ++row) {
 		for (int col = 0; col < depth.cols; ++col) {
 			ushort d = depth.ptr<ushort>(row)[col];

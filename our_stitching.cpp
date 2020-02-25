@@ -54,10 +54,14 @@ int main (int argc, char** argv) {
     Mat source_depth = get_filter_depth(source_dir);
     vector<Point2> source_left_points, source_right_points;
     PointCloud<PointXYZRGB>::Ptr source_cloud = construct_point_cloud(source_rgb, source_depth, source_left_points, source_right_points);
+
+    //这段可以不用 因为是右侧相机的立体图像
     Mat target_rgb = read_dir_img(target_dir, "left");
     Mat target_depth = get_filter_depth(target_dir);
     vector<Point2> target_left_points, target_right_points;
     PointCloud<PointXYZRGB>::Ptr target_cloud = construct_point_cloud(target_rgb, target_depth, target_left_points, target_right_points);
+
+
     timer.end("[完成3D场景重建]");
 
 
@@ -75,8 +79,8 @@ int main (int argc, char** argv) {
     }
     //3D场景重建完成并且用vtk显示
 
-
 }
+
 
 //     timer.end("[完成3D场景拼接]");
 //     //最佳视点区域分割
@@ -92,18 +96,19 @@ int main (int argc, char** argv) {
 //     transformPointCloud(*target_cloud, *target_cloud, target_transform);
 //     Mat target_coordinate_img = get_coordinate_image(target_cloud);
 
-// //    Mat source_view_img = draw_cloud_image(source_cloud);
-// //    Mat target_view_img = draw_cloud_image(target_cloud);
-// //    imwrite("source_view_img.png", source_view_img);
-// //    imwrite("target_view_img.png", target_view_img);
+//    Mat source_view_img = draw_cloud_image(source_cloud);
+//    Mat target_view_img = draw_cloud_image(target_cloud);
+//    imwrite("source_view_img.png", source_view_img);
+//    imwrite("target_view_img.png", target_view_img);
+//    // 点云图片输出
 
 //     float x_offset = transform(0, 3);
 //     float z_offset = transform(2, 3);
 
 //     float source_min_col, target_max_col;
 //     calculate_cloud_overlap_edge(source_coordinate_img, target_coordinate_img, source_min_col, target_max_col, x_offset, z_offset);
-//     int source_left_col = 850;//int(source_min_col);
-//     int target_left_col = 800;//int(target_max_col);
+//     int source_left_col = 850;//int(source_min_col); 左图选出最不显著的区域 
+//     int target_left_col = 800;//int(target_max_col); 右图选出最不显著的区域
 
 //     for (int i = 0 ; i < max_size ; ++i) {
 //         for (int j = 0 ; j < max_size ; ++j) {
@@ -165,51 +170,52 @@ int main (int argc, char** argv) {
 //     Mat stitch_left_img = left_consist.applyWarping(BLEND_AVERAGE, left_overlap_width, source_left_col, target_left_col);
 
 
-// //    imwrite("stitching_left.png", stitch_left_img);
+//     imwrite("stitching_left.png", stitch_left_img);
 //     timer.end("[完成左视图的拼接]");
-// //    return 0;
-//     //---右视图
-//     Eigen::Matrix4f left2right_transform = Eigen::Matrix4f::Identity();
-//     left2right_transform(0, 3) = -0.12001928710937500000;
-//     transformPointCloud(*source_cloud, *source_cloud, left2right_transform);
-//     transformPointCloud(*target_cloud, *target_cloud, left2right_transform);
-
-//     //---source image
-//     vector<Point2> source_right_origin_points, source_right_dest_points;
-//     Mat source_right_img = draw_cloud_image(source_cloud, source_right_points, source_right_origin_points, source_right_dest_points, 0, source_right_col);
-
-//     //---target image
-//     vector<Point2> target_right_origin_points, target_right_dest_points;
-//     Mat target_right_img = draw_cloud_image(target_cloud, target_right_points, target_right_origin_points, target_right_dest_points, target_right_col, img_width * extern_rate);
-
-//     //---overlap image
-//     Mat source_right_overlap_img = Mat::zeros(img_height * extern_rate, right_overlap_width, CV_8UC3);
-//     Mat target_right_overlap_img = Mat::zeros(img_height * extern_rate, right_overlap_width, CV_8UC3);
-//     append_overlap_image(source_cloud, target_cloud, x_offset, z_offset, source_right_col, target_right_col, right_overlap_width,
-//                                                source_right_points, source_right_origin_points, source_right_dest_points,
-//                                                target_right_points, target_right_origin_points, target_right_dest_points,
-//                                                source_right_overlap_img, target_right_overlap_img);
-//     MultiImages multi_rigth_images(source_dir, target_dir, "right", LINES_FILTER_WIDTH, LINES_FILTER_LENGTH);
-
-//     Consistent_Stitching right_consist(multi_rigth_images);
-//     right_consist.setPaths(left_consist.getMappingPaths());
-//     right_consist.setSize(img_width * extern_rate, img_height * extern_rate);
-//     vector<pair<Point2, Point2> > source_right_mapping_pairs = join_pairs(source_right_origin_points, source_right_dest_points);
-//     vector<pair<Point2, Point2> > target_right_mapping_pairs = join_pairs(target_right_origin_points, target_right_dest_points);
-//     right_consist.set_mapping_pair(source_right_mapping_pairs, target_right_mapping_pairs);
-//     vector<vector<pair<Point2, Point2> > > right_boundary_pairs = right_consist.calulate_boundary_pair();
-
-//     right_consist.set_boundary_pair(right_boundary_pairs);
-//     right_consist.setWeightToAlignmentTerm(1);
-//     right_consist.setWeightToSimilarityTerm(0.75, GLOBAL_ROTATION_3D_METHOD);
-
-//     Mat stitch_right_img = right_consist.applyWarping(BLEND_AVERAGE, right_overlap_width, source_right_col, target_right_col);
-// //    imwrite("stitching_right.png", stitch_right_img);
-//     timer.end("[完成右视图的拼接]");
-
-//     crop_stitching_result(stitch_left_img, stitch_right_img);
-//     imwrite("our_left.png", stitch_left_img);
-//     imwrite("our_right.png", stitch_right_img);
-//     timer.end("[完成视图的裁剪]");
-
 // }
+// // //    return 0;
+// //     //---右视图
+// //     Eigen::Matrix4f left2right_transform = Eigen::Matrix4f::Identity();
+// //     left2right_transform(0, 3) = -0.12001928710937500000;
+// //     transformPointCloud(*source_cloud, *source_cloud, left2right_transform);
+// //     transformPointCloud(*target_cloud, *target_cloud, left2right_transform);
+
+// //     //---source image
+// //     vector<Point2> source_right_origin_points, source_right_dest_points;
+// //     Mat source_right_img = draw_cloud_image(source_cloud, source_right_points, source_right_origin_points, source_right_dest_points, 0, source_right_col);
+
+// //     //---target image
+// //     vector<Point2> target_right_origin_points, target_right_dest_points;
+// //     Mat target_right_img = draw_cloud_image(target_cloud, target_right_points, target_right_origin_points, target_right_dest_points, target_right_col, img_width * extern_rate);
+
+// //     //---overlap image
+// //     Mat source_right_overlap_img = Mat::zeros(img_height * extern_rate, right_overlap_width, CV_8UC3);
+// //     Mat target_right_overlap_img = Mat::zeros(img_height * extern_rate, right_overlap_width, CV_8UC3);
+// //     append_overlap_image(source_cloud, target_cloud, x_offset, z_offset, source_right_col, target_right_col, right_overlap_width,
+// //                                                source_right_points, source_right_origin_points, source_right_dest_points,
+// //                                                target_right_points, target_right_origin_points, target_right_dest_points,
+// //                                                source_right_overlap_img, target_right_overlap_img);
+// //     MultiImages multi_rigth_images(source_dir, target_dir, "right", LINES_FILTER_WIDTH, LINES_FILTER_LENGTH);
+
+// //     Consistent_Stitching right_consist(multi_rigth_images);
+// //     right_consist.setPaths(left_consist.getMappingPaths());
+// //     right_consist.setSize(img_width * extern_rate, img_height * extern_rate);
+// //     vector<pair<Point2, Point2> > source_right_mapping_pairs = join_pairs(source_right_origin_points, source_right_dest_points);
+// //     vector<pair<Point2, Point2> > target_right_mapping_pairs = join_pairs(target_right_origin_points, target_right_dest_points);
+// //     right_consist.set_mapping_pair(source_right_mapping_pairs, target_right_mapping_pairs);
+// //     vector<vector<pair<Point2, Point2> > > right_boundary_pairs = right_consist.calulate_boundary_pair();
+
+// //     right_consist.set_boundary_pair(right_boundary_pairs);
+// //     right_consist.setWeightToAlignmentTerm(1);
+// //     right_consist.setWeightToSimilarityTerm(0.75, GLOBAL_ROTATION_3D_METHOD);
+
+// //     Mat stitch_right_img = right_consist.applyWarping(BLEND_AVERAGE, right_overlap_width, source_right_col, target_right_col);
+// // //    imwrite("stitching_right.png", stitch_right_img);
+// //     timer.end("[完成右视图的拼接]");
+
+// //     crop_stitching_result(stitch_left_img, stitch_right_img);
+// //     imwrite("our_left.png", stitch_left_img);
+// //     imwrite("our_right.png", stitch_right_img);
+// //     timer.end("[完成视图的裁剪]");
+
+// // }
